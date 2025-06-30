@@ -1,280 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mocha Daily Report</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 40px;
-      background: linear-gradient(to right, #1e3c72, #2a5298);
-      color: #fff;
-    }
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      background: #263238;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 30px;
-      color: #ffcc80;
-      text-align: center;
-      text-shadow: 1px 1px 2px #000;
-    }
-    .info-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    .info-row label {
-      flex: 1 1 200px;
-      display: flex;
-      flex-direction: column;
-      font-size: 14px;
-      color: #b0bec5;
-    }
-    .info-row input {
-      margin-top: 6px;
-      padding: 8px;
-      border: none;
-      border-radius: 6px;
-      background: #37474f;
-      color: #fff;
-      font-size: 14px;
-    }
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      margin-bottom: 40px;
-    }
-    .card {
-      background: #37474f;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .card h2 {
-      font-size: 16px;
-      color: #b0bec5;
-      margin-bottom: 10px;
-    }
-    .card p {
-      font-size: 24px;
-      font-weight: bold;
-      color: #fff;
-      margin: 0;
-    }
-    .btn-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-top: 30px;
-    }
-    .btn {
-      background: #ff7043;
-      color: white;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      text-align: center;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background: #e64a19;
-    }
-    canvas {
-      background: #37474f;
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 30px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #263238;
+        color: #fff;
+        padding: 40px;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      input {
+        padding: 10px;
+        border-radius: 6px;
+        border: none;
+        width: 100%;
+        max-width: 300px;
+        margin-bottom: 10px;
+      }
+      button {
+        padding: 12px;
+        background: #ff7043;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
     <h1>☕ Mocha Daily Report</h1>
 
-    <div class="info-row">
-      <label>
-        <input id="username" placeholder="Username" />
-        <input id="password" type="password" placeholder="Password" />
-
-        Reported By
-        <input id="reportedBy" placeholder="Enter your name" />
-      </label>
-      <label>
-        Date
-        <input id="reportDate" readonly />
-      </label>
-      <label>
-        Opening Time
-        <input id="openTime" type="time" />
-      </label>
-      <label>
-        Closing Time
-        <input id="closeTime" type="time" />
-      </label>
+    <div class="form-group">
+      <input id="username" placeholder="Username" />
+      <input id="password" type="password" placeholder="Password" />
     </div>
 
-    <div class="summary">
-      <div class="card"><h2>🎯 Today’s Target</h2><p>0 USD <span style="font-size: 14px; color: #b0bec5;">(To be set)</span></p></div>
-      <div class="card"><h2>📅 MTD Target</h2><p>0 USD <span style="font-size: 14px; color: #b0bec5;">(To be set)</span></p></div>
-      <div class="card"><h2>✅ Today’s Sale</h2><p id="todaySale">--</p></div>
-      <div class="card"><h2>📊 MTD Sale</h2><p id="mtdSale">--</p></div>
-      <div class="card"><h2>💸 Today’s Expense</h2><p id="todayExpense">--</p></div>
-      <div class="card"><h2>📉 MTD Expense</h2><p id="mtdExpense">--</p></div>
+    <div class="form-group">
+      <input id="reportedBy" placeholder="Reported By" />
+      <input id="openTime" type="time" />
+      <input id="closeTime" type="time" />
     </div>
 
-    <canvas id="reportChart" height="100"></canvas>
-
-    <div class="btn-grid">
-      <a href="./payment.html" class="btn">💳 Payment</a>
-      <a href="./cash.html" class="btn">💵 Cash Count</a>
-      <a href="./staff.html" class="btn">👥 Staff</a>
-      <a href="./expenses.html" class="btn">📦 Expenses</a>
-      <a href="./requisition.html" class="btn">📝 Requisition</a>
-      <button class="btn" onclick="submitReport()">📤 Submit Report</button>
-
+    <div class="form-group">
+      <input id="todaySale" placeholder="Today Sale (USD)" />
+      <input id="todayExpense" placeholder="Today Expense (USD)" />
+      <input id="mtdSale" placeholder="MTD Sale (USD)" />
+      <input id="mtdExpense" placeholder="MTD Expense (USD)" />
     </div>
-  </div>
 
-  <script>
-    function showSalesSummary() {
-      const sales = JSON.parse(localStorage.getItem("salesData") || "{}");
-      const expenses = JSON.parse(localStorage.getItem("expensesSummary") || "{}");
-      const today = new Date().toISOString().split("T")[0];
-      const month = today.slice(0, 7);
+    <button onclick="submitReport()">📤 Submit Report</button>
 
-      let todaySale = sales[today] || 0;
-      let mtdSale = 0;
-      let todayExpense = expenses[today] || 0;
-      let mtdExpense = 0;
+    <script>
+      function submitReport() {
+        const payload = {
+          username: document.getElementById("username").value,
+          password: document.getElementById("password").value,
+          reportedBy: document.getElementById("reportedBy").value,
+          openTime: document.getElementById("openTime").value,
+          closeTime: document.getElementById("closeTime").value,
+          todaySale: parseFloat(document.getElementById("todaySale").value) || 0,
+          todayExpense: parseFloat(document.getElementById("todayExpense").value) || 0,
+          mtdSale: parseFloat(document.getElementById("mtdSale").value) || 0,
+          mtdExpense: parseFloat(document.getElementById("mtdExpense").value) || 0
+        };
 
-      for (const [date, amount] of Object.entries(sales)) {
-        if (date.startsWith(month)) mtdSale += amount;
+        google.script.run
+          .withSuccessHandler(() => {
+            alert("✅ Report submitted!");
+            document.querySelectorAll("input").forEach(i => i.value = "");
+          })
+          .withFailureHandler(err => {
+            alert("❌ Failed to submit: " + err.message);
+          })
+          .submitToSheet(payload);
       }
-      for (const [date, amount] of Object.entries(expenses)) {
-        if (date.startsWith(month)) mtdExpense += amount;
-      }
-
-      document.getElementById("todaySale").textContent = `$${todaySale.toFixed(2)}`;
-      document.getElementById("mtdSale").textContent = `$${mtdSale.toFixed(2)}`;
-      document.getElementById("todayExpense").textContent = `$${todayExpense.toFixed(2)}`;
-      document.getElementById("mtdExpense").textContent = `$${mtdExpense.toFixed(2)}`;
-
-      drawChart(todaySale, todayExpense, mtdSale, mtdExpense);
-    }
-
-    function drawChart(todaySale, todayExpense, mtdSale, mtdExpense) {
-      const ctx = document.getElementById("reportChart").getContext("2d");
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ["Today", "MTD"],
-          datasets: [
-            {
-              label: "Sales (USD)",
-              data: [todaySale, mtdSale],
-              backgroundColor: "#4caf50"
-            },
-            {
-              label: "Expenses (USD)",
-              data: [todayExpense, mtdExpense],
-              backgroundColor: "#f44336"
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'top', labels: { color: '#fff' } },
-            title: { display: true, text: 'Sales vs Expenses', color: '#fff' }
-          },
-          scales: {
-            x: { ticks: { color: '#fff' } },
-            y: { ticks: { color: '#fff' }, beginAtZero: true }
-          }
-        }
-      });
-    }
-
-    function loadMeta() {
-      const reportedBy = localStorage.getItem("reportedBy") || "";
-      const openTime = localStorage.getItem("openTime") || "";
-      const closeTime = localStorage.getItem("closeTime") || "";
-      document.getElementById("reportedBy").value = reportedBy;
-      document.getElementById("openTime").value = openTime;
-      document.getElementById("closeTime").value = closeTime;
-            const today = new Date().toISOString().split("T")[0];
-      document.getElementById("reportDate").value = today;
-    }
-
-    function saveMeta() {
-      const reportedBy = document.getElementById("reportedBy").value;
-      const openTime = document.getElementById("openTime").value;
-      const closeTime = document.getElementById("closeTime").value;
-      localStorage.setItem("reportedBy", reportedBy);
-      localStorage.setItem("openTime", openTime);
-      localStorage.setItem("closeTime", closeTime);
-    }
-
-    // Auto-save meta fields when changed
-    document.addEventListener("DOMContentLoaded", () => {
-      loadMeta();
-      showSalesSummary();
-
-      document.getElementById("reportedBy").addEventListener("input", saveMeta);
-      document.getElementById("openTime").addEventListener("change", saveMeta);
-      document.getElementById("closeTime").addEventListener("change", saveMeta);
-    });
-  </script>
-  <script>
-  function submitReport() {
-    const payload = {
-      username: document.getElementById("username").value,
-      password: document.getElementById("password").value,
-      reportedBy: document.getElementById("reportedBy").value,
-      openTime: document.getElementById("openTime").value,
-      closeTime: document.getElementById("closeTime").value,
-      todaySale: parseFloat(document.getElementById("todaySale").value) || 0,
-      todayExpense: parseFloat(document.getElementById("todayExpense").value) || 0,
-      mtdSale: parseFloat(document.getElementById("mtdSale").value) || 0,
-      mtdExpense: parseFloat(document.getElementById("mtdExpense").value) || 0
-    };
-
-    fetch("https://script.google.com/macros/s/AKfycbzffOeGB3R12O8qh64107dHdcqLw1xpyzKVDE_kgpcVm2jXLsR-L1VlOtLgtwLkbJUFCQ/exec", {
-      method: "POST",
-      body: JSON.stringify(payload),
-      headers: { "Content-Type": "application/json" }
-    })
-    .then(res => res.text())
-    .then(msg => {
-      if (msg === "Unauthorized") {
-        alert("❌ Invalid username or password");
-      } else {
-        alert("✅ Report submitted!");
-        document.querySelectorAll("input").forEach(i => i.value = "");
-      }
-    })
-    .catch(err => alert("❌ Failed to submit"));
-  }
-</script>
-
-</body>
-
+    </script>
+  </body>
 </html>
-     
