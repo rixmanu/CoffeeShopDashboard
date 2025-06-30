@@ -12,59 +12,20 @@
 <body>
   <h1>☕ Mocha Daily Report</h1>
 
-  <div>
-    <input id="username" placeholder="Username" />
-    <input id="password" type="password" placeholder="Password" />
-  </div>
+  <form action="https://script.google.com/macros/s/AKfycbzffOeGB3R12O8qh64107dHdcqLw1xpyzKVDE_kgpcVm2jXLsR-L1VlOtLgtwLkbJUFCQ/exec" method="POST" target="_blank">
+    <input name="username" placeholder="Username" required />
+    <input name="password" type="password" placeholder="Password" required /><br>
 
-  <div>
-    <input id="reportedBy" placeholder="Reported By" />
-    <input id="openTime" type="time" />
-    <input id="closeTime" type="time" />
-  </div>
+    <input name="reportedBy" placeholder="Reported By" required />
+    <input name="openTime" type="time" required />
+    <input name="closeTime" type="time" required /><br>
 
-  <div>
-    <input id="todaySale" placeholder="Today Sale (USD)" />
-    <input id="todayExpense" placeholder="Today Expense (USD)" />
-    <input id="mtdSale" placeholder="MTD Sale (USD)" />
-    <input id="mtdExpense" placeholder="MTD Expense (USD)" />
-  </div>
+    <input name="todaySale" placeholder="Today Sale (USD)" required />
+    <input name="todayExpense" placeholder="Today Expense (USD)" required />
+    <input name="mtdSale" placeholder="MTD Sale (USD)" required />
+    <input name="mtdExpense" placeholder="MTD Expense (USD)" required /><br>
 
-  <button onclick="submitReport()">📤 Submit Report</button>
-
-  <script>
-    function submitReport() {
-      const payload = {
-        username: document.getElementById("username").value,
-        password: document.getElementById("password").value,
-        reportedBy: document.getElementById("reportedBy").value,
-        openTime: document.getElementById("openTime").value,
-        closeTime: document.getElementById("closeTime").value,
-        todaySale: parseFloat(document.getElementById("todaySale").value) || 0,
-        todayExpense: parseFloat(document.getElementById("todayExpense").value) || 0,
-        mtdSale: parseFloat(document.getElementById("mtdSale").value) || 0,
-        mtdExpense: parseFloat(document.getElementById("mtdExpense").value) || 0
-      };
-
-      fetch("https://script.google.com/macros/s/AKfycbzffOeGB3R12O8qh64107dHdcqLw1xpyzKVDE_kgpcVm2jXLsR-L1VlOtLgtwLkbJUFCQ/exec", {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(res => res.text())
-      .then(msg => {
-        if (msg === "Unauthorized") {
-          alert("❌ Invalid username or password");
-        } else {
-          alert("✅ Report submitted!");
-          document.querySelectorAll("input").forEach(i => i.value = "");
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        alert("❌ Failed to submit");
-      });
-    }
-  </script>
+    <button type="submit">📤 Submit Report</button>
+  </form>
 </body>
 </html>
