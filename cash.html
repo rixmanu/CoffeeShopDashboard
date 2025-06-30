@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cash Count</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 40px;
+      background: linear-gradient(135deg, #6d4c41, #a1887f, #d7ccc8);
+      color: #fff;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #4e342e;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 30px;
+      color: #ffe0b2;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #795548;
+      padding: 10px;
+      text-align: center;
+      vertical-align: middle;
+      color: #fff;
+    }
+    th {
+      background: #5d4037;
+      font-weight: 600;
+    }
+    .inline-input {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+    }
+    .inline-input span {
+      min-width: 60px;
+      text-align: right;
+    }
+    .inline-input input {
+      width: 60px;
+      text-align: right;
+    }
+    input {
+      padding: 8px;
+      border: 1px solid #8d6e63;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #3e2723;
+      color: #fff;
+      box-sizing: border-box;
+    }
+    input:read-only {
+      background: #6d4c41;
+      color: #ffe0b2;
+    }
+    .btn {
+      background: #ff7043;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 30px;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #e64a19;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💵 Cash Count</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>USD</th>
+          <th>RIELS</th>
+          <th>RIELS TO USD</th>
+          <th>TOTAL (USD)</th>
+        </tr>
+      </thead>
+      <tbody id="cashTableBody">
+        <!-- Rows will be inserted by script -->
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3">Grand Total (USD)</th>
+          <td><input id="grandTotal" readonly /></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <button class="btn" onclick="saveCash()">💾 Save</button>
+    <a href="./mocha-daily-report.html" class="btn">← Back to Home</a>
+  </div>
+
+  <script>
+    const exchangeRate = 4100;
+    const usdDenoms = [100, 50, 20, 10, 5, 2, 1];
+    const khrDenoms = [100000, 50000, 20000, 10000, 5000, 2000, 1000, 500, 200];
+
+    function createRow(usd, khr) {
+      return `
+        <tr>
+          <td>${usd ? `<div class="inline-input"><span>${usd} x</span><input class="usd-count" data-denom="${usd}" placeholder="0" /></div>` : ''}</td>
+          <td>${khr ? `<div class="inline-input"><span>${khr} x</span><input class="khr-count" data-denom="${khr}" placeholder="0" /></div>` : ''}</td>
+          <td><input class="khr-usd" readonly /></td>
+          <td><input class="usd-total" readonly /></td>
+        </tr>
+      `;
+    }
+
+    function buildTable() {
+      const tbody = document.getElementById("cashTableBody");
+      tbody.innerHTML = "";
+      const maxRows = Math.max(usdDenoms.length, khrDenoms.length);
+      for (let i = 0; i < maxRows; i++) {
+        const usd = usdDenoms[i] || "";
+        const khr = khrDenoms[i] || "";
+        tbody.innerHTML += createRow(usd, khr);
+      }
+    }
+
+    function enforceNumeric(input) {
+      input.addEventListener("input", () => {
+        input.value = input.value.replace(/[^0-9]/g, "");
+        calculateTotals();
+      });
+      input.addEventListener("focus", () => input.select());
+    }
+
+    function calculateTotals() {
+      let total = 0;
+      const usdCounts = document.querySelectorAll(".usd-count");
+      const usdTotals = document.querySelectorAll(".usd-total");
+      const khrCounts = document.querySelectorAll(".khr-count");
+      const khrUsdFields = document.querySelectorAll(".khr-usd");
+
+      for (let i = 0; i < usdTotals.length; i++) {
+        const usdQty = parseFloat(usdCounts[i]?.value) || 0;
+        const usdDenom = parseFloat(usdCounts[i]?.dataset.denom) || 0;
+        const usdTotal = usdQty * usdDenom;
+        usdTotals[i].value = usdTotal ? usdTotal.toFixed(2) : "";
+
+        const khrQty = parseFloat(khrCounts[i]?.value) || 0;
+        const khrDenom = parseFloat(khrCounts[i]?.dataset.denom) || 0;
+        const khrTotal = khrQty * khrDenom;
+        const khrToUsd = khrTotal / exchangeRate;
+        khrUsdFields[i].value = khrToUsd ? khrToUsd.toFixed(2) : "";
+
+        usdTotals[i].value = (usdTotal + khrToUsd) ? (usdTotal + khrToUsd).toFixed(2) : "";
+        total += usdTotal + khrToUsd;
+      }
+
+      document.getElementById("grandTotal").value = total ? total.toFixed(2) : "";
+    }
+
+    function saveCash() {
+      const data = {};
+      document.querySelectorAll("input").forEach(input => {
+        if (input.dataset.denom) {
+          data[input.dataset.denom] = input.value;
+        }
+      });
+      localStorage.setItem("cashData", JSON.stringify(data));
+
+      // Save grand total for MTD
+      const total = parseFloat(document.getElementById("grandTotal").value) || 0;
+      const today = new Date().toISOString().split("T")[0];
+      const sales = JSON.parse(localStorage.getItem("salesData") || "{}");
+      sales[today] = total;
+      localStorage.setItem("salesData", JSON.stringify(sales));
+
+      alert("✅ Cash data saved!");
+    }
+
+    function loadCash() {
+      const data = JSON.parse(localStorage.getItem("cashData") || "{}");
+      document.querySelectorAll("input").forEach(input => {
+        if (input.dataset.denom && data[input.dataset.denom]) {
+          input.value = data[input.dataset.denom];
+        }
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      buildTable();
+      document.querySelectorAll(".usd-count, .khr-count").forEach(enforceNumeric);
+      loadCash();
+      calculateTotals();
+    });
+  </script>
+</body>
+</html>

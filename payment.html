@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payment Summary</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 40px;
+      background: linear-gradient(135deg, #6d4c41, #a1887f, #d7ccc8);
+      color: #fff;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #4e342e;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 30px;
+      color: #ffe0b2;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #795548;
+      padding: 10px;
+      text-align: center;
+      vertical-align: middle;
+      color: #fff;
+    }
+    th {
+      background: #5d4037;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #8d6e63;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #3e2723;
+      color: #fff;
+      box-sizing: border-box;
+      text-align: right;
+    }
+    input:read-only {
+      background: #6d4c41;
+      color: #ffe0b2;
+    }
+    .btn {
+      background: #ff7043;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 20px;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #e64a19;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💳 Payment Summary</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Payment Method</th>
+          <th>USD</th>
+          <th>RIELS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Cash</td>
+          <td><input class="usd" placeholder="0" /></td>
+          <td><input class="riels" placeholder="0" /></td>
+        </tr>
+        <tr>
+          <td>ABA</td>
+          <td><input class="usd" placeholder="0" /></td>
+          <td><input class="riels" placeholder="0" /></td>
+        </tr>
+        <tr>
+          <td>QR</td>
+          <td><input class="usd" placeholder="0" /></td>
+          <td><input class="riels" placeholder="0" /></td>
+        </tr>
+        <tr>
+          <td>Credit</td>
+          <td><input class="usd" placeholder="0" /></td>
+          <td><input class="riels" placeholder="0" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <tbody>
+        <tr>
+          <td>Exchange Rate</td>
+          <td><input id="exchangeRate" placeholder="e.g. 4100" /></td>
+        </tr>
+        <tr>
+          <td>RIELS to USD</td>
+          <td><input id="rielsToUsd" readonly /></td>
+        </tr>
+        <tr>
+          <td>Total USD</td>
+          <td><input id="totalUsd" readonly /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="btn" onclick="savePayment()">💾 Save</button>
+    <a href="./mocha-daily-report.html" class="btn">← Back to Home</a>
+  </div>
+
+  <script>
+    function enforceNumeric(input) {
+      input.addEventListener("input", () => {
+        input.value = input.value.replace(/[^0-9]/g, "");
+        calculateTotals();
+      });
+      input.addEventListener("focus", () => input.select());
+    }
+
+    function calculateTotals() {
+      const exchangeRate = parseFloat(document.getElementById("exchangeRate")?.value) || 0;
+      let totalUsd = 0;
+      let totalRiels = 0;
+
+      document.querySelectorAll(".usd").forEach(input => {
+        const val = parseFloat(input.value) || 0;
+        totalUsd += val;
+      });
+
+      document.querySelectorAll(".riels").forEach(input => {
+        const val = parseFloat(input.value) || 0;
+        totalRiels += val;
+      });
+
+      const rielsToUsd = exchangeRate ? totalRiels / exchangeRate : 0;
+      document.getElementById("rielsToUsd").value = rielsToUsd ? rielsToUsd.toFixed(2) : "";
+      document.getElementById("totalUsd").value = (totalUsd + rielsToUsd).toFixed(2);
+    }
+
+    function savePayment() {
+      const data = {
+        usd: [],
+        riels: [],
+        exchangeRate: document.getElementById("exchangeRate").value
+      };
+
+      document.querySelectorAll(".usd").forEach(input => data.usd.push(input.value));
+      document.querySelectorAll(".riels").forEach(input => data.riels.push(input.value));
+
+      localStorage.setItem("paymentData", JSON.stringify(data));
+
+      // Save total to MTD
+      const total = parseFloat(document.getElementById("totalUsd").value) || 0;
+      const today = new Date().toISOString().split("T")[0];
+      const sales = JSON.parse(localStorage.getItem("salesData") || "{}");
+      sales[today] = total;
+      localStorage.setItem("salesData", JSON.stringify(sales));
+
+      alert("✅ Payment saved!");
+    }
+
+    function loadPayment() {
+      const data = JSON.parse(localStorage.getItem("paymentData") || "{}");
+      if (!data) return;
+
+      document.querySelectorAll(".usd").forEach((input, i) => input.value = data.usd?.[i] || "");
+      document.querySelectorAll(".riels").forEach((input, i) => input.value = data.riels?.[i] || "");
+      if (data.exchangeRate) document.getElementById("exchangeRate").value = data.exchangeRate;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".usd, .riels, #exchangeRate").forEach(enforceNumeric);
+      loadPayment();
+      calculateTotals();
+    });
+  </script>
+</body>
+</html>

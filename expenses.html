@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expenses</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 40px;
+      background: linear-gradient(135deg, #6d4c41, #a1887f, #d7ccc8);
+      color: #fff;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: #4e342e;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 30px;
+      color: #ffe0b2;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #795548;
+      padding: 10px;
+      text-align: center;
+      vertical-align: middle;
+      color: #fff;
+    }
+    th {
+      background: #5d4037;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #8d6e63;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #3e2723;
+      color: #fff;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    input:read-only {
+      background: #6d4c41;
+      color: #ffe0b2;
+    }
+    .btn {
+      background: #ff7043;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 10px;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #e64a19;
+    }
+    .totals {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📦 Expenses</h1>
+    <table id="expensesTable">
+      <thead>
+        <tr>
+          <th>Item Name</th>
+          <th>Amount (USD)</th>
+          <th>Amount (RIELS)</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <!-- Same as before, but with 7 hardcoded rows -->
+<tbody>
+  <tr><td><input class="item" /></td><td><input class="usd" /></td><td><input class="riels" /></td><td><input class="remarks" /></td></tr>
+  <tr><td><input class="item" /></td><td><input class="usd" /></td><td><input class="riels" /></td><td><input class="remarks" /></td></tr>
+  <tr><td><input class="item" /></td><td><input class="usd" /></td><td><input class="riels" /></td><td><input class="remarks" /></td></tr>
+  <tr><td><input class="item" /></td><td><input class="usd" /></td><td><input class="riels" /></td><td><input class="remarks" /></td></tr>
+  <tr><td><input class="item" /></td><td><input class="usd" /></td><td><input class="riels" /></td><td><input class="remarks" /></td></tr>
+  <tr><td><input class="item" /></td><td><input class="usd" /></td><td><input class="riels" /></td><td><input class="remarks" /></td></tr>
+  <tr><td><input class="item" /></td><td><input class="usd" /></td><td><input class="riels" /></td><td><input class="remarks" /></td></tr>
+</tbody>
+
+    </table>
+
+    <button class="btn" onclick="addRow()">➕ Add Item</button>
+    <button class="btn" onclick="saveExpenses()">💾 Save</button>
+    <a href="./mocha-daily-report.html" class="btn">← Back to Home</a>
+
+    <div class="totals">
+      <div>Total Items: <span id="totalItems">0</span></div>
+      <div>Total Expense: <span id="totalAmount">0.00</span> USD</div>
+    </div>
+  </div>
+
+  <script>
+    const exchangeRate = 4100;
+
+    function enforceNumeric(input) {
+      input.addEventListener("input", () => {
+        input.value = input.value.replace(/[^0-9.]/g, "");
+        calculateTotals();
+      });
+      input.addEventListener("focus", () => input.select());
+    }
+
+    function calculateTotals() {
+      let totalItems = 0;
+      let totalAmount = 0;
+
+      const rows = document.querySelectorAll("#expensesTable tbody tr");
+
+      rows.forEach(row => {
+        const item = row.querySelector(".item")?.value.trim();
+        const usd = parseFloat(row.querySelector(".usd")?.value) || 0;
+        const riels = parseFloat(row.querySelector(".riels")?.value) || 0;
+
+        if (item) totalItems += 1;
+
+        const rielsToUsd = riels / exchangeRate;
+        totalAmount += usd + rielsToUsd;
+      });
+
+      document.getElementById("totalItems").textContent = totalItems;
+      document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
+    }
+
+    function addRow() {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input class="item" /></td>
+        <td><input class="usd" /></td>
+        <td><input class="riels" /></td>
+        <td><input class="remarks" /></td>
+      `;
+      document.querySelector("#expensesTable tbody").appendChild(row);
+      row.querySelectorAll(".usd, .riels").forEach(enforceNumeric);
+    }
+
+    function saveExpenses() {
+      const data = [];
+      document.querySelectorAll("#expensesTable tbody tr").forEach(row => {
+        const item = row.querySelector(".item")?.value || "";
+        const usd = row.querySelector(".usd")?.value || "";
+        const riels = row.querySelector(".riels")?.value || "";
+        const remarks = row.querySelector(".remarks")?.value || "";
+        data.push({ item, usd, riels, remarks });
+      });
+      localStorage.setItem("expensesData", JSON.stringify(data));
+      alert("✅ Expenses saved!");
+    }
+function saveExpenses() {
+  const data = [];
+  document.querySelectorAll("#expensesTable tbody tr").forEach(row => {
+    const item = row.querySelector(".item")?.value || "";
+    const usd = row.querySelector(".usd")?.value || "";
+    const riels = row.querySelector(".riels")?.value || "";
+    const remarks = row.querySelector(".remarks")?.value || "";
+    data.push({ item, usd, riels, remarks });
+  });
+  localStorage.setItem("expensesData", JSON.stringify(data));
+
+  // Save today's total expense for MTD tracking
+  const total = parseFloat(document.getElementById("totalAmount").textContent) || 0;
+  const today = new Date().toISOString().split("T")[0];
+  const expenses = JSON.parse(localStorage.getItem("expensesSummary") || "{}");
+  expenses[today] = total;
+  localStorage.setItem("expensesSummary", JSON.stringify(expenses));
+
+  alert("✅ Expenses saved!");
+}
+
+    function loadExpenses() {
+      const data = JSON.parse(localStorage.getItem("expensesData") || "[]");
+      const tbody = document.querySelector("#expensesTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(entry => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><input class="item" value="${entry.item}" /></td>
+          <td><input class="usd" value="${entry.usd}" /></td>
+          <td><input class="riels" value="${entry.riels}" /></td>
+          <td><input class="remarks" value="${entry.remarks}" /></td>
+        `;
+        tbody.appendChild(row);
+        row.querySelectorAll(".usd, .riels").forEach(enforceNumeric);
+      });
+      if (data.length === 0) {
+        for (let i = 0; i < 7; i++) addRow();
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadExpenses();
+      calculateTotals();
+    });
+  </script>
+</body>
+</html>
